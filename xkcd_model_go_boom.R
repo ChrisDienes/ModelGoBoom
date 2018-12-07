@@ -37,9 +37,11 @@ ratioxy <- diff(xrange) / diff(yrange)
 datalines_1 <- data.frame(xbegin=0.17,ybegin=0.65,xend=0.30, yend=0.8)
 datalines_2 <- data.frame(xbegin=0.65,ybegin=0.65,xend=0.55, yend=0.75)
 datalines_axes_jitter <- (1-0)/50
-datalines_right <- data.frame(xbegin=1,ybegin=0,xend=1, yend=1)
-datalines_top <- data.frame(xbegin=0,ybegin=1,xend=1, yend=1)
-datalines_box <- data.frame(xbegin=c(0.38,0.38,0.54,0.38),ybegin=c(0.02,0.02,0.02,0.18),xend=c(0.54,0.38,0.54,0.54), yend=c(0.02,0.18,0.18,0.18))
+datalines_right <- data.frame(xbegin = 1, xend = 1, ybegin = 0, yend = 1)
+datalines_top   <- data.frame(xbegin = 0, xend = 1 ,ybegin = 1, yend = 1)
+datalines_box <- data.frame(xbegin=c(0.38,0.38,0.54,0.38),ybegin=c(0.02,0.02,0.02,0.18),
+                            xend=c(0.54,0.38,0.54,0.54), yend=c(0.02,0.18,0.18,0.18),
+                            group = factor(rep("grroupA",4)))
 datalines_box_end <- data.frame(xbegin=c(0.38,0.38,0.54,0.38),ybegin=c(0.02,0.02,0.02,0.04),xend=c(0.54,0.38,0.54,0.54), yend=c(0.02,0.04,0.04,0.04))
 boom_rect = data.frame(xmin=0.38,ymin=0.02,xmax=0.54,ymax=0.18)
 mapping <- aes(x, y, scale, ratioxy, angleofspine,
@@ -111,14 +113,32 @@ checklist_mapping <- aes(xmin=xmin,ymin=ymin,xmax=xmax,ymax=ymax)
 # suppresWarnings() are used to cleanup 
 # unwanted console messages.
 # ----------------------------------------- #
+xkcd_blank = function(label, size){
+  suppressWarnings(
+    p <- ggplot() +
+      xkcdaxis(xrange,yrange) +
+      annotate("text", x=0.5, y=0.5, label = label, family="xkcd",size=size) +
+      xkcdline(aes(x=xbegin,y=ybegin,xend=xend, yend=yend), datalines_right, xjitteramount = datalines_axes_jitter) +
+      xkcdline(aes(x=xbegin,y=ybegin,xend=xend, yend=yend), datalines_top, yjitteramount = datalines_axes_jitter) +
+      theme(axis.ticks = element_blank(),
+            axis.title.x = element_blank(),
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.title.y = element_blank(),
+            plot.title = element_text(hjust = 0.5))
+  )
+  return(p)
+}
+
+
 xkcd_open = function(dataman, talkingline, talkingtext, textx, texty){
   if(is.null(talkingline)){
     suppressWarnings(
       p <- ggplot() +
         xkcdaxis(xrange,yrange) +
         xkcdman(mapping, dataman) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend, yend=yend), datalines_right, xjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend, yend=yend), datalines_top, yjitteramount = datalines_axes_jitter) +
         ggtitle("Dramatization") +
         theme(axis.ticks = element_blank(),
             axis.title.x = element_blank(),
@@ -133,9 +153,9 @@ xkcd_open = function(dataman, talkingline, talkingtext, textx, texty){
         xkcdaxis(xrange,yrange) +
         xkcdman(mapping, dataman) +
         annotate("text", x=textx, y=texty, label = talkingtext, family="xkcd",size=7) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),talkingline, xjitteramount = 0.07) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),talkingline, xjitteramount = 0.07) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend, yend=yend), datalines_right, xjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend, yend=yend), datalines_top, yjitteramount = datalines_axes_jitter) +
         ggtitle("Dramatization") +
         theme(axis.ticks = element_blank(),
             axis.title.x = element_blank(),
@@ -156,10 +176,10 @@ xkcd_checklist = function(kk){
         annotate("text", x=0.5, y=0.92, label = "Chris' To Do List", family="xkcd",size=7) +
         annotate("text", x=0.40, y=0.75, label = "Get Data", family="xkcd",size=6) +
         annotate("text", x=0.42, y=0.55, label = "Train Model", family="xkcd",size=6) +
-        annotate("text", x=0.44, y=0.35, label = "Validate Model", family="xkcd",size=6) +
-        annotate("text", x=0.42, y=0.15, label = "Test Model", family="xkcd",size=6) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
+        annotate("text", x=0.42, y=0.35, label = "Test Model", family="xkcd",size=6) +
+        annotate("text", x=0.51, y=0.15, label = "Make A Presentation", family="xkcd",size=6) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
         ggtitle("Dramatization") +
         theme(axis.ticks = element_blank(),
               axis.title.x = element_blank(),
@@ -176,10 +196,10 @@ xkcd_checklist = function(kk){
         annotate("text", x=0.5, y=0.92, label = "Chris' To Do List", family="xkcd",size=7) +
         annotate("text", x=0.40, y=0.75, label = "Get Data", family="xkcd",size=6) +
         annotate("text", x=0.42, y=0.55, label = "Train Model", family="xkcd",size=6) +
-        annotate("text", x=0.44, y=0.35, label = "Validate Model", family="xkcd",size=6) +
-        annotate("text", x=0.42, y=0.15, label = "Test Model", family="xkcd",size=6) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
+        annotate("text", x=0.42, y=0.35, label = "Test Model", family="xkcd",size=6) +
+        annotate("text", x=0.51, y=0.15, label = "Make A Presentation", family="xkcd",size=6) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
         ggtitle("Dramatization") +
         theme(axis.ticks = element_blank(),
             axis.title.x = element_blank(),
@@ -199,9 +219,9 @@ xkcd_prod = function(dataman, talkingline, talkingtext, textx, texty, boxjitter)
         xkcdaxis(xrange,yrange) +
         xkcdman(mapping, dataman) +
         annotate("text", x=0.46, y=0.10, label = "Model", family="xkcd",size=6) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_box, xjitteramount = boxjitter, yjitteramount = boxjitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_box, xjitteramount = boxjitter, yjitteramount = boxjitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
         ggtitle("Dramatization") +
         theme(axis.ticks = element_blank(),
               axis.title.x = element_blank(),
@@ -217,10 +237,10 @@ xkcd_prod = function(dataman, talkingline, talkingtext, textx, texty, boxjitter)
         xkcdman(mapping, dataman) +
         annotate("text", x=textx, y=texty, label = talkingtext, family="xkcd",size=7) +
         annotate("text", x=0.46, y=0.10, label = "Model", family="xkcd",size=6) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),talkingline, xjitteramount = 0.07) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_box, xjitteramount = boxjitter, yjitteramount = boxjitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),talkingline, xjitteramount = 0.07) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_box, xjitteramount = boxjitter, yjitteramount = boxjitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
         ggtitle("Dramatization") +
         theme(axis.ticks = element_blank(),
               axis.title.x = element_blank(),
@@ -230,64 +250,6 @@ xkcd_prod = function(dataman, talkingline, talkingtext, textx, texty, boxjitter)
               plot.title = element_text(hjust = 0.5))
     )
   }
-  return(p)
-}
-
-xkcd_end = function(dataman, talkingline, talkingtext, textx, texty, boxjitter){
-  if(is.null(talkingline)){
-    suppressWarnings(
-      p <- ggplot() +
-        xkcdaxis(xrange,yrange) +
-        xkcdman(mapping, dataman) +
-        annotate("text", x=0.46, y=0.10, label = "Model", family="xkcd",size=6) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_box_end, xjitteramount = boxjitter, yjitteramount = boxjitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
-        ggtitle("Dramatization") +
-        theme(axis.ticks = element_blank(),
-              axis.title.x = element_blank(),
-              axis.text.x = element_blank(),
-              axis.text.y = element_blank(),
-              axis.title.y = element_blank(),
-              plot.title = element_text(hjust = 0.5))
-    )
-  }else{
-    suppressWarnings(
-      p <- ggplot() +
-        xkcdaxis(xrange,yrange) +
-        xkcdman(mapping, dataman) +
-        annotate("text", x=textx, y=texty, label = talkingtext, family="xkcd",size=7) +
-        annotate("text", x=0.46, y=0.10, label = "Model", family="xkcd",size=6) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),talkingline, xjitteramount = 0.07) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_box_end, xjitteramount = boxjitter, yjitteramount = boxjitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-        xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
-        ggtitle("Dramatization") +
-        theme(axis.ticks = element_blank(),
-              axis.title.x = element_blank(),
-              axis.text.x = element_blank(),
-              axis.text.y = element_blank(),
-              axis.title.y = element_blank(),
-              plot.title = element_text(hjust = 0.5))
-    )
-  }
-  return(p)
-}
-
-xkcd_blank = function(label, size){
-  suppressWarnings(
-    p <- ggplot() +
-      xkcdaxis(xrange,yrange) +
-      annotate("text", x=0.5, y=0.5, label = label, family="xkcd",size=size) +
-      xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-      xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
-      theme(axis.ticks = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.title.y = element_blank(),
-            plot.title = element_text(hjust = 0.5))
-  )
   return(p)
 }
 
@@ -296,11 +258,11 @@ xkcd_misc = function(){
                      xkcdaxis(xrange,yrange) +
                      xkcdman(mapping, dataman_ohno2) +
                      xkcdrect(checklist_mapping,boom_rect, fill="red", colour="black") +
-                     xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend,colour="yellow",size=2),datalines_box, xjitteramount = 0.1, yjitteramount = 0.1) +
-                     xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
-                     xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
+                     xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend,colour=group,size=2),datalines_box, xjitteramount = 0.1, yjitteramount = 0.1) +
+                     xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
+                     xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
                      annotate("text", x=0.46, y=0.1, label = "BOOM", family="xkcd",size=24) +
-                     scale_color_manual(values=c("#FFB914")) +
+                    scale_colour_manual(values=c("#FFB914")) +
                      ggtitle("Dramatization") +
                      theme(axis.ticks = element_blank(),
                            axis.title.x = element_blank(),
@@ -312,13 +274,56 @@ xkcd_misc = function(){
   )
   return(p)
 }
+
+xkcd_end = function(dataman, talkingline, talkingtext, textx, texty, boxjitter){
+  if(is.null(talkingline)){
+    suppressWarnings(
+      p <- ggplot() +
+        xkcdaxis(xrange,yrange) +
+        xkcdman(mapping, dataman) +
+        annotate("text", x=0.46, y=0.10, label = "Model", family="xkcd",size=6) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_box_end, xjitteramount = boxjitter, yjitteramount = boxjitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
+        ggtitle("Dramatization") +
+        theme(axis.ticks = element_blank(),
+              axis.title.x = element_blank(),
+              axis.text.x = element_blank(),
+              axis.text.y = element_blank(),
+              axis.title.y = element_blank(),
+              plot.title = element_text(hjust = 0.5))
+    )
+  }else{
+    suppressWarnings(
+      p <- ggplot() +
+        xkcdaxis(xrange,yrange) +
+        xkcdman(mapping, dataman) +
+        annotate("text", x=textx, y=texty, label = talkingtext, family="xkcd",size=7) +
+        annotate("text", x=0.46, y=0.10, label = "Model", family="xkcd",size=6) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),talkingline, xjitteramount = 0.07) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_box_end, xjitteramount = boxjitter, yjitteramount = boxjitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_right, xjitteramount = datalines_axes_jitter) +
+        xkcdline(aes(x=xbegin,y=ybegin,xend=xend,yend=yend),datalines_top, yjitteramount = datalines_axes_jitter) +
+        ggtitle("Dramatization") +
+        theme(axis.ticks = element_blank(),
+              axis.title.x = element_blank(),
+              axis.text.x = element_blank(),
+              axis.text.y = element_blank(),
+              axis.title.y = element_blank(),
+              plot.title = element_text(hjust = 0.5))
+    )
+  }
+  return(p)
+}
+
+
 # ---------------------------------- #
 # Create function for animation
 # ---------------------------------- #
-makeplot <- function(){
+makeplot <- function(scene_selection){
 for(ss in 1:length(scene_selection)){
   if(scene_selection[ss] == 35){p <- xkcd_blank(label = " ", size = 20)}
-  if(scene_selection[ss] == 36){p <- xkcd_blank(label = "N1F02 Production\nPresents", size = 16)}
+  if(scene_selection[ss] == 36){p <- xkcd_blank(label = "Cube N1F02 Production\nPresents", size = 14)}
   if(scene_selection[ss] == 1){p <- xkcd_blank(label = "Model Go\nBoom", size = 36)}
   if(scene_selection[ss] == 2){p <- xkcd_blank(label = "Starring", size = 20)}
   if(scene_selection[ss] == 3){p <- xkcd_blank(label = "Michael\nand\nChris", size = 20)}
@@ -405,6 +410,10 @@ scene_selection = c(35,35,
 N = length(scene_selection)
 oopt = ani.options(interval = 0, nmax = N)
 # This may take a minute to run, then launches in browser
-saveGIF(makeplot(),movie.name = "model_go_boom.gif", interval = 0.5, width = 580, height = 400)
+saveGIF(makeplot(scene_selection = scene_selection),
+        movie.name = "model_go_boom.gif", 
+        interval = 0.5, 
+        width = 580, 
+        height = 400)
 ani.options(oopt)
 
